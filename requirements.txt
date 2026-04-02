@@ -2,5 +2,5 @@ streamlit
 numpy
 pandas
 matplotlib
-opencv
-ultralytic
+opencv-python
+ultralytics
