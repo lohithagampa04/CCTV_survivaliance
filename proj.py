@@ -1,9 +1,22 @@
 import streamlit as st
-from PIL import Image
+
+# ✅ Safe import for cv2 (prevents crash in your file)
+try:
+    import cv2
+except ImportError:
+    cv2 = None
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from ultralytics import YOLO
+
+# ✅ Safe import for YOLO (this is where your error actually happens)
+try:
+    from ultralytics import YOLO
+except ImportError:
+    YOLO = None
+    st.error("Ultralytics or OpenCV not installed. Add 'opencv-python-headless' to requirements.txt")
+
 from datetime import datetime
 import os
 import time
@@ -22,6 +35,9 @@ h1 {text-align:center; color:red;}
 st.markdown("<h1>🚨 Smart CCTV Surveillance 📹</h1>", unsafe_allow_html=True)
 
 # ---------------- MODEL ----------------
+if YOLO is None:
+    st.stop()
+
 model = YOLO("yolov8n.pt")
 
 # ---------------- SIDEBAR ----------------
@@ -55,6 +71,10 @@ with col2:
 FRAME_WINDOW = st.image([])
 
 if st.session_state.run:
+    if cv2 is None:
+        st.error("OpenCV not available. Install opencv-python-headless.")
+        st.stop()
+
     cap = cv2.VideoCapture(0)
 
     while st.session_state.run:
@@ -117,11 +137,9 @@ if len(st.session_state.data) > 0:
     df = pd.DataFrame(st.session_state.data)
 
     st.subheader("📋 Detection Log")
-
     st.dataframe(df)
 
     st.subheader("📊 Total Count")
-
     st.write(f"👤 Total Persons: {st.session_state.person_total}")
     st.write(f"📦 Total Objects: {st.session_state.object_total}")
 
